@@ -4,15 +4,16 @@ class Generate():
         self.depth = depth
         self.context = context
 
-    def run_generation(self):
+    def run_generation(self, generation: int):
         alphabet = self.lsystem.alphabet
         productions = self.lsystem.productions
         sentence = self.lsystem.sentence
 
         rewrites = []
-        for symbol in sentence:
+        for index, symbol in enumerate(sentence):
             production = productions.get(symbol)
-            rewrite = production(symbol, context)
+            self.context.evolve(sentence, index, generation)
+            rewrite = production(symbol, self.context)
             rewrites.append(rewrite)
 
         sentence = sentence.empty()
