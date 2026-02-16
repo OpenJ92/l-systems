@@ -1,32 +1,76 @@
+class RunScope():
+    def __init__(self, name, lsystem):
+        self.name = name
+        self.lsystem = lsystem
+
+class GenerationScope():
+    def __init__(self, depth, generation, sentence):
+        self.depth = depth
+        self.generation = generation
+        self.sentence = sentence
+
+class PositionScope():
+    def __init__(self, index, symbol):
+        self.index = index
+        self.symbol = symbol
+
+class ScopeBundle():
+    def __init__(self, *, run=None, generation=None, position=None):
+        self.run = run or RunScope
+        self.generation = generation or GenerationScope
+        self.position = position or PositionScope
+
 class Generate():
-    def __init__(self, lsystem: LSystem, depth: int, context: Context):
+    def __init__(self, lsystem: LSystem, depth: int, scope = None):
         self.lsystem = lsystem
         self.depth = depth
-        self.context = context
-
-    def run_generation(self, generation: int):
-        alphabet = self.lsystem.alphabet
-        productions = self.lsystem.productions
-        sentence = self.lsystem.sentence
-
-        rewrites = []
-        for index, symbol in enumerate(sentence):
-            production = productions.get(symbol)
-            context = self.context.evolve(sentence, index, generation)
-            rewrites.append(production(symbol, context))
-
-        sentence = sentence.empty()
-        for rewrite in rewrites:
-            sentence = sentence.combine(rewrite)
-
-        return sentence
+        self.scope = scope or ScopeBundle()
+        self.name = hash(self)
 
     def run(self):
+        ## Gather LSystem elements
         sentence = self.lsystem.sentence
+        productions = self.lsystem.productions
+
+        ## Update root Scope object and capture
+        root = self.scope.run(self.name, self.lsystem)
+
         for generation in range(self.depth):
-            sentence = self.run_generation(generation)
+            ## Update branch Scope object and capture
+            branch = self.scope.generation(self.depth, generation, sentence)
+
+            rewrites = []
+            for index, symbol in enumerate(sentence):
+                ## Update leaf Scope object and capture
+                leaf = self.scope.position(index, symbol)
+
+                ## Retrieve production 
+                production = productions.get(symbol)
+
+                ## Construct ScopeBundle to be passed to production
+                context = ScopeBundle(root, branch, leaf)
+
+                ## Apply production to current symbol with ScopeBundle 
+                ## access and append to rewrites :: List[Sentence]
+                rewrites.append(production(symbol, context))
+
+                ## Successful exit of loop captures all applications of
+                ## appropriate productions into rewrites. In the current
+                ## state, sentence contains the previous iteration's Sentence
+
+            ## Overwrite current sentence :: Sentence with Monoidal empty
+            sentence = sentence.empty()
+            for rewrite in rewrites:
+                ## Apply Monoidal combine linearly. Successful exit of loop
+                ## reconstitutes the results of above productions into the 
+                ## current generation's sentence
+                sentence = sentence.combine(rewrite)
+
+                ## Successful exit of loop reconstitutes the results of 
+                ## above productions into the current generation's Sentence
+
+        ## Having applied our LSystem self.depth times, return the resulting Sentence
         return sentence
             
-
 def Run(generate: Generate):
     return generate.run()
