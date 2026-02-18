@@ -5,9 +5,12 @@ class String(str):
     @classmethod
     def empty(cls) -> Self:
         return cls("")
+    @classmethod
+    def lift(cls, symbol):
+        return cls(f"{symbol}")
 
     def combine(self, other: Self) -> Self:
-        return type(self)(str(self) + str(other))
+        return type(self)(self + other)
 
     def clone(self) -> Self:
         return self
