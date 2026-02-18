@@ -14,17 +14,23 @@ class PositionScope():
         self.index = index
         self.symbol = symbol
 
-class ScopeBundle():
+class ScopeClasses():
     def __init__(self, *, run=None, generation=None, position=None):
         self.run = run or RunScope
         self.generation = generation or GenerationScope
         self.position = position or PositionScope
 
+class ScopeBundle():
+    def __init__(self, run, generation, position):
+        self.run = run
+        self.generation = generation
+        self.position = position
+
 class Generate():
-    def __init__(self, lsystem: LSystem, depth: int, scope = None):
+    def __init__(self, lsystem: LSystem, depth: int, scope : ScopeClasses = None):
         self.lsystem = lsystem
         self.depth = depth
-        self.scope = scope or ScopeBundle()
+        self.scope = scope or ScopeClasses()
         self.name = hash(self)
 
     def run(self):
@@ -48,15 +54,11 @@ class Generate():
                 production = productions.get(symbol)
 
                 ## Construct ScopeBundle to be passed to production
-                context = ScopeBundle(root, branch, leaf)
+                package = ScopeBundle(root, branch, leaf)
 
                 ## Apply production to current symbol with ScopeBundle 
                 ## access and append to rewrites :: List[Sentence]
-                rewrites.append(production(symbol, context))
-
-                ## Successful exit of loop captures all applications of
-                ## appropriate productions into rewrites. In the current
-                ## state, sentence contains the previous iteration's Sentence
+                rewrites.append(production(symbol, package))
 
             ## Overwrite current sentence :: Sentence with Monoidal empty
             sentence = sentence.empty()
@@ -66,10 +68,8 @@ class Generate():
                 ## current generation's sentence
                 sentence = sentence.combine(rewrite)
 
-                ## Successful exit of loop reconstitutes the results of 
-                ## above productions into the current generation's Sentence
-
-        ## Having applied our LSystem self.depth times, return the resulting Sentence
+            print(sentence, generation)
+        
         return sentence
             
 def Run(generate: Generate):
