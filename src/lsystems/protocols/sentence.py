@@ -1,14 +1,8 @@
 from typing import Protocol
 
 class Sentence(Protocol):
-    def combine(self, other):
-        raise NotImplementedError
-
-    def mempty(self):
-        raise NotImplementedError
-
-    def __len__(self):
-        raise NotImplementedError
-
-    def __getitem__(self, index: int):
-        raise NotImplementedError
+    @classmethod
+    def mempty(self): ...
+    def combine(self, other): ...
+    def __len__(self): ...
+    def __getitem__(self, index: int): ...
