@@ -54,7 +54,7 @@ class Generate():
             ## Update branch Scope object and capture
             branch = self.scope.generation(self.depth, generation, sentence)
 
-            rewrites = []
+            nsentence = sentence.empty()
             for index, symbol in enumerate(sentence):
                 ## Update leaf Scope object and capture
                 leaf = self.scope.position(index, symbol)
@@ -65,17 +65,11 @@ class Generate():
                 ## Construct ScopeBundle to be passed to production
                 package = ScopeBundle(root, branch, leaf)
 
-                ## Apply production to current symbol with ScopeBundle 
-                ## access and append to rewrites :: List[Sentence]
-                rewrites.append(production(symbol, package))
+                rewrite = production(symbol, package)
+                nsentence = nsentence.combine(rewrite)
 
-            ## Overwrite current sentence :: Sentence with Monoidal empty
-            sentence = sentence.empty()
-            for rewrite in rewrites:
-                ## Apply Monoidal combine linearly. Successful exit of loop
-                ## reconstitutes the results of above productions into the 
-                ## current generation's sentence
-                sentence = sentence.combine(rewrite)
+            sentence = nsentence
+
 
         return sentence
             
