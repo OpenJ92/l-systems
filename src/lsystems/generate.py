@@ -1,7 +1,15 @@
+import random
+
 class RunScope():
-    def __init__(self, name, lsystem):
+    def __init__(self, name, lsystem, seed):
         self.name = name
         self.lsystem = lsystem
+
+        if seed is None:
+            seed = random.randrange(2**64)
+
+        self.seed = seed
+        self.random = random.Random(seed)
 
 class GenerationScope():
     def __init__(self, depth, generation, sentence):
@@ -27,11 +35,12 @@ class ScopeBundle():
         self.position = position
 
 class Generate():
-    def __init__(self, lsystem: LSystem, depth: int, scope : ScopeClasses = None):
+    def __init__(self, lsystem: LSystem, depth: int, scope : ScopeClasses = None, seed : int = None):
         self.lsystem = lsystem
         self.depth = depth
         self.scope = scope or ScopeClasses()
         self.name = hash(self)
+        self.seed = seed
 
     def run(self):
         ## Gather LSystem elements
@@ -39,7 +48,7 @@ class Generate():
         productions = self.lsystem.productions
 
         ## Update root Scope object and capture
-        root = self.scope.run(self.name, self.lsystem)
+        root = self.scope.run(self.name, self.lsystem, self.seed)
 
         for generation in range(self.depth):
             ## Update branch Scope object and capture

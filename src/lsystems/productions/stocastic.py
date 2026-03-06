@@ -29,26 +29,22 @@ class Stochastic(Production):
         self._cutoffs.append(self.total)
         self._sentences.append(sentence)
 
-    def sample(self) -> Sentence:
+    def sample(self, rng) -> Sentence:
         """
         Sample one Sentence proportional to its frequency.
         """
         if self.total <= 0:
             raise LookupError("Cannot sample from an empty Stochastic distribution")
 
-        r = randrange(self.total)          # integer in [0, total)
+        r = rng.randrange(self.total)          # integer in [0, total)
         i = bisect_right(self._cutoffs, r) # locate bucket
         return self._sentences[i]
 
     def __call__(self, symbol: Symbol, scope: ScopeBundle) -> Sentence:
         """
         Production interface: ignore symbol/scope by default and just sample a sentence.
-
-        If you later want symbol/scope-dependent behavior, you can:
-          - store multiple Stochastic dists keyed by symbol/context
-          - or make add() accept a predicate and filter before sampling
         """
-        return self.sample()
+        return self.sample(scope.run.random)
 
     def __len__(self) -> int:
         return len(self._sentences)
