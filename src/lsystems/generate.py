@@ -9,7 +9,7 @@ class RunScope():
             seed = random.randrange(2**64)
 
         self.seed = seed
-        self.random = random.Random(seed)
+        self.rng = random.Random(seed)
 
 class GenerationScope():
     def __init__(self, depth, generation, sentence):
@@ -54,28 +54,25 @@ class Generate():
             ## Update branch Scope object and capture
             branch = self.scope.generation(self.depth, generation, sentence)
 
-            rewrites = []
+            ## Build next sentence directly instead of storing rewrites first
+            new_sentence = sentence.empty()
+
             for index, symbol in enumerate(sentence):
                 ## Update leaf Scope object and capture
                 leaf = self.scope.position(index, symbol)
 
-                ## Retrieve production 
+                ## Retrieve production
                 production = productions.get(symbol)
 
                 ## Construct ScopeBundle to be passed to production
                 package = ScopeBundle(root, branch, leaf)
 
-                ## Apply production to current symbol with ScopeBundle 
-                ## access and append to rewrites :: List[Sentence]
-                rewrites.append(production(symbol, package))
+                ## Apply production and combine immediately
+                rewrite = production(symbol, package)
+                new_sentence = new_sentence.combine(rewrite)
 
-            ## Overwrite current sentence :: Sentence with Monoidal empty
-            sentence = sentence.empty()
-            for rewrite in rewrites:
-                ## Apply Monoidal combine linearly. Successful exit of loop
-                ## reconstitutes the results of above productions into the 
-                ## current generation's sentence
-                sentence = sentence.combine(rewrite)
+            ## Advance to the next generation
+            sentence = new_sentence
 
         return sentence
             
