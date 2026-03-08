@@ -2,9 +2,18 @@ from lsystems.protocols.sentence import Sentence
 from lsystems.protocols.production import Production
 from collections.abc import Hashable
 
-class Static(Production):
-    def __init__(self, sentence: Sentence):
-        self.sentence = sentence.clone()
+from lsystems.protocols.production import Production
 
-    def __call__(self, symbol: Hashable, scope: "ScopeBundle"):
+
+class Static(Production):
+    """
+    Deterministic production.
+
+    Always replaces the symbol with the same sentence.
+    """
+
+    def __init__(self, sentence):
+        self.sentence = sentence
+
+    def resolve(self, symbol, scope):
         return self.sentence

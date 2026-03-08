@@ -9,7 +9,7 @@ class RunScope():
             seed = random.randrange(2**64)
 
         self.seed = seed
-        self.random = random.Random(seed)
+        self.rng = random.Random(seed)
 
 class GenerationScope():
     def __init__(self, depth, generation, sentence):
