@@ -1,3 +1,5 @@
+from pathlib import Path
+
 from lsystems.sentences.string import String
 from lsystems.sentences.tuple import Tuple
 from lsystems.productions.static import Static
@@ -466,5 +468,45 @@ lsys = LSystem(alphabet, productions, sentence)
 gen = Generate(lsys, depth=5)
 
 print("Example 14")
+print(gen.run())
+print()
+
+
+# ============================================================
+# Example 15: FASS
+# ============================================================
+
+lines = []
+with open('src/lsystems/data/n5.fass', 'r') as file:
+    for line in file:
+        lines.append(line.strip())
+
+def h(character):
+    return {"L":"R", "R":"L", "+":"-", "-":"+", "F":"F"}[character]
+
+def homomorphism(line):
+    return "".join([h(character) for character in line])
+    
+def right(line):
+    return homomorphism(line[::-1])
+
+_left = Stochastic()
+_right = Stochastic()
+
+for line in lines:
+    _left.add(1, Static(String(line)))
+    _right.add(1, Static(String(right(line))))
+
+productions = Productions(String)
+productions.add("L", _left)
+productions.add("R", _right)
+
+alphabet = set("LR+-F")
+sentence = String("L")
+
+lsys = LSystem(alphabet, productions, sentence)
+gen = Generate(lsys, depth=4)
+
+print("Example 15")
 print(gen.run())
 print()
