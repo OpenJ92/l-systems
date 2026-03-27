@@ -16,12 +16,13 @@ class Stochastic(Production):
     Sentences are selected according to weighted frequencies.
     """
 
-    def __init__(self):
+    def __init__(self, fallback: Production | None = None):
         self.total = 0
         self._cutoffs = []
-        self._sentences = []
+        self._productions = []
+        self.fallback = fallback
 
-    def add(self, frequency, sentence):
+    def add(self, frequency, production: Production):
         """
         Add a stochastic rule with the given frequency weight.
         """
@@ -31,7 +32,7 @@ class Stochastic(Production):
 
         self.total += frequency
         self._cutoffs.append(self.total)
-        self._sentences.append(sentence)
+        self._productions.append(production)
 
     def sample(self, rng):
         """
@@ -44,13 +45,17 @@ class Stochastic(Production):
         r = rng.randrange(self.total)
         i = bisect_right(self._cutoffs, r)
 
-        return self._sentences[i]
+        return self._productions[i]
 
     def resolve(self, symbol, scope):
         """
         Resolve by sampling from the run RNG.
         """
-        return self.sample(scope.run.rng)
+        if not self._productions:
+            return self.fallback(symbol, scope)
+
+        production = self.sample(scope.run.rng)
+        return production.resolve(symbol, scope)
 
     def clear(self):
         """Remove all stochastic rules."""

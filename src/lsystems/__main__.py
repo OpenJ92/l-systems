@@ -477,7 +477,11 @@ print()
 # ============================================================
 
 lines = []
+<<<<<<< HEAD
 with open('src/lsystems/data/n4.fass', 'r') as file:
+=======
+with open('src/lsystems/data/n5.fass', 'r') as file:
+>>>>>>> f71e8e3e2ec1af20ba2630995e611d38a3198d17
     for line in file:
         lines.append(line.strip())
 
@@ -505,7 +509,7 @@ alphabet = set("LR+-F")
 sentence = String("L")
 
 lsys = LSystem(alphabet, productions, sentence)
-gen = Generate(lsys, depth=5)
+gen = Generate(lsys, depth=4)
 
 print("Example 15")
 print(gen.run())

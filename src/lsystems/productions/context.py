@@ -7,23 +7,9 @@ from lsystems.productions.precedence import Precedence
 class ContextSensitive(Production):
     """
     Fixed-width context sensitive production.
-
-    Rules match based on exact left and right context sizes.
-
-    Example
-    -------
-        empty > A < B
-
-    would be represented with:
-
-        ContextSensitive(0, 1)
-
-    and rule:
-
-        ("", "B") -> replacement
     """
 
-    def __init__(self, left_width: int, right_width: int):
+    def __init__(self, left_width: int, right_width: int, fallback: Production | None = None):
         if left_width < 0:
             raise ValueError("left_width must be non-negative")
 
@@ -33,21 +19,11 @@ class ContextSensitive(Production):
         self.left_width = left_width
         self.right_width = right_width
         self._rules = {}
+        self.fallback = fallback
 
-    def add(self, left, right, sentence):
+    def add(self, left, right, production: Production):
         """
         Add a context-sensitive rule.
-
-        Parameters
-        ----------
-        left
-            Sentence representing the left context
-
-        right
-            Sentence representing the right context
-
-        sentence
-            Replacement sentence
         """
 
         if len(left) != self.left_width:
@@ -56,30 +32,39 @@ class ContextSensitive(Production):
         if len(right) != self.right_width:
             raise ValueError("Right context width mismatch")
 
-        self._rules[(left, right)] = sentence
+        self._rules[(left, right)] = production
 
     def resolve(self, symbol, scope):
         """
         Attempt to match the surrounding context.
 
         If a rule matches the left and right context,
-        its replacement sentence is returned.
+        its production is resolved.
         """
 
         sentence = scope.generation.sentence
         index = scope.position.index
 
         left = sentence.left_of(index, self.left_width)
-
         if left is None:
+            if self.fallback is not None:
+                return self.fallback.resolve(symbol, scope)
             return None
 
         right = sentence.right_of(index, self.right_width)
-
         if right is None:
+            if self.fallback is not None:
+                return self.fallback.resolve(symbol, scope)
             return None
 
-        return self._rules.get((left, right))
+        production = self._rules.get((left, right))
+        if production is not None:
+            return production.resolve(symbol, scope)
+
+        if self.fallback is not None:
+            return self.fallback.resolve(symbol, scope)
+
+        return None
 
     def clear(self):
         """Remove all rules."""
@@ -95,8 +80,6 @@ class VariationalContextSensitive(Precedence):
 
     This class wraps multiple fixed-width ContextSensitive
     productions inside a precedence dispatcher.
-
-    Wider contexts are automatically evaluated first.
     """
 
     def __init__(self, *contexts: ContextSensitive, fallback=None, auto_order=True):
@@ -125,19 +108,17 @@ class VariationalContextSensitive(Precedence):
         Parameters
         ----------
         rules
-            Iterable of (left, right, replacement)
-
-        Rules are grouped by context width automatically.
+            Iterable of (left, right, production)
         """
 
         groups = OrderedDict()
 
-        for left, right, replacement in rules:
+        for left, right, production in rules:
             key = (len(left), len(right))
 
             if key not in groups:
                 groups[key] = ContextSensitive(*key)
 
-            groups[key].add(left, right, replacement)
+            groups[key].add(left, right, production)
 
         return cls(*groups.values(), fallback=fallback, auto_order=auto_order)

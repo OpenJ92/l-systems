@@ -1,9 +1,4 @@
-from lsystems.protocols.sentence import Sentence
 from lsystems.protocols.production import Production
-from collections.abc import Hashable
-
-from lsystems.protocols.production import Production
-
 
 class Static(Production):
     """
