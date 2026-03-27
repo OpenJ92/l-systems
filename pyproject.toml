@@ -1,6 +1,6 @@
 [project]
 name = "lsystems-core"
-version = "0.1.0"
+version = "0.1.2"
 description = "A compositional L-system framework for generative structures and symbolic rewriting in Python."
 readme = { file = "README.md", content-type = "text/markdown" }
 requires-python = ">=3.14"
