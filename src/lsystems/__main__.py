@@ -477,11 +477,7 @@ print()
 # ============================================================
 
 lines = []
-<<<<<<< HEAD
 with open('src/lsystems/data/n4.fass', 'r') as file:
-=======
-with open('src/lsystems/data/n5.fass', 'r') as file:
->>>>>>> f71e8e3e2ec1af20ba2630995e611d38a3198d17
     for line in file:
         lines.append(line.strip())
 
