@@ -1,26 +1,39 @@
-[build-system]
-requires = ["setuptools>=69", "wheel"]
-build-backend = "setuptools.build_meta"
-
 [project]
-name = "lsystems"
+name = "lsystems-core"
 version = "0.1.0"
-description = "Functional L-system definition, generation, and interpretation."
-readme = "README.md"
+description = "A compositional L-system framework for generative structures and symbolic rewriting in Python."
+readme = { file = "README.md", content-type = "text/markdown" }
 requires-python = ">=3.14"
-license = { file = "LICENSE" }
-authors = [{ name = "Jacob Martin Vartuli-Schonberg" }]
-dependencies = []
 
-[project.optional-dependencies]
-dev = [
-  "pytest>=8",
-  "ruff>=0.9",
-  "mypy>=1.8",
+authors = [
+  { name = "Jacob Vartuli-Schonberg" }
 ]
 
-[tool.setuptools]
-package-dir = {"" = "src"}
+license = { file = "LICENSE" }
 
-[tool.setuptools.packages.find]
-where = ["src"]
+keywords = [
+  "l-systems",
+  "generative-art",
+  "symbolic-rewriting",
+  "formal-languages",
+  "fractals",
+  "graphics",
+  "turtle"
+]
+
+classifiers = [
+  "Development Status :: 3 - Alpha",  # change later
+  "Intended Audience :: Developers",
+  "License :: Other/Proprietary License",
+  "Operating System :: OS Independent",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3.14",
+  "Programming Language :: Python :: 3 :: Only",
+  "Topic :: Software Development :: Libraries :: Python Modules",
+  "Topic :: Scientific/Engineering :: Visualization"
+]
+
+[project.urls]
+Homepage = "https://github.com/OpenJ92/l-systems"
+Repository = "https://github.com/OpenJ92/l-systems"
+Issues = "https://github.com/OpenJ92/l-systems/issues"
